@@ -1,17 +1,44 @@
 import FormField from "@/components/FormField";
 import PrimaryButton from "@/components/PrimaryButton";
+import auth from "@/config/firebase.config";
 import images from "@/constants/images";
+import useAuth from "@/hooks/useAuth";
 import { router } from "expo-router";
+import { updateProfile } from "firebase/auth";
+import { useToast } from "native-base";
 import React, { useState } from "react";
 import { Image, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Register = () => {
+  const toast = useToast();
+  const { emailPasswordRegister } = useAuth();
   const [form, setForm] = useState({
     username: "",
     email: "",
     password: "",
   });
+
+  const handleRegister = async () => {
+    try {
+      const email = form.email;
+      const password = form.password;
+      const res = await emailPasswordRegister(email, password);
+      if (res?.user) {
+        updateProfile(auth.currentUser, {
+          displayName: form.username,
+        });
+        setTimeout(() => {
+          router.push("/home");
+        }, 1000);
+      }
+    } catch (error) {
+      // console.log(error);
+      toast.show({
+        description: "Something Went Wrong!",
+      });
+    }
+  };
 
   return (
     <SafeAreaView className="bg-primary h-full">
@@ -52,13 +79,13 @@ const Register = () => {
           <PrimaryButton
             title={"Sign Up"}
             containerStyles={"mt-10"}
-            handlePress={() => console.log("hi")}
+            handlePress={handleRegister}
             textStyles={" text-xl"}
           />
           <Text className="text-gray-100 font-pregular text-base mt-5 text-center">
             Already have an account?{" "}
             <Text
-              onPress={() => router.push("/login")}
+              onPress={() => router.push("/home")}
               className="text-secondary font-psemibold focus:underline underline-offset-4 decoration-secondary"
             >
               Login
