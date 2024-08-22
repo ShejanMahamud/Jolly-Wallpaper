@@ -12,6 +12,7 @@ const Loader = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#161622",
     justifyContent: "center",
     alignItems: "center",
   },

@@ -17,10 +17,6 @@ const Home = () => {
         description: "Successfully Logged Out!",
       });
     } catch (error) {
-      //    setTimeout(() => {
-      //     router.push("/home");
-      //   }, 1000);
-
       toast.show({
         description: "Something Went Wrong!",
       });
