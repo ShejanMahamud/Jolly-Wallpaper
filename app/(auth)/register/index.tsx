@@ -91,15 +91,14 @@ const Register = () => {
             handleChangeText={(e) => setForm({ ...form, email: e })}
             placeholder={"Your email address"}
             value={form.email}
-            otherStyles={"mt-10"}
-            keyboardType={"email-address"}
+            otherStyles={"mt-5"}
           />
           <FormField
             title={"Password"}
             handleChangeText={(e) => setForm({ ...form, password: e })}
             placeholder={"*******"}
             value={form.password}
-            otherStyles={"mt-10"}
+            otherStyles={"mt-5"}
           />
           {!form?.image ? (
             <PrimaryButton

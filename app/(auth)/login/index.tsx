@@ -56,7 +56,6 @@ const Login = () => {
             placeholder={"Your email address"}
             value={form.email}
             otherStyles={"mt-10"}
-            keyboardType={"email-address"}
           />
           <FormField
             title={"Password"}
