@@ -1,4 +1,5 @@
 import bookmark from "../assets/icons/bookmark.png";
+import category from "../assets/icons/category.png";
 import eyeHide from "../assets/icons/eye-hide.png";
 import eye from "../assets/icons/eye.png";
 import google from "../assets/icons/google.png";
@@ -27,4 +28,5 @@ export default {
   eyeHide,
   eye,
   google,
+  category,
 };

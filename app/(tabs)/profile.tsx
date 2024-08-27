@@ -2,10 +2,9 @@ import FormField from "@/components/FormField";
 import { uploadImage } from "@/components/ImageUpload";
 import Loader from "@/components/Loader";
 import PrimaryButton from "@/components/PrimaryButton";
-import auth from "@/config/firebase.config";
-import useAuth from "@/hooks/useAuth";
+import { useEditUserMutation, useGetUserQuery } from "@/redux/api/authApi";
+import { clearUser } from "@/redux/features/auth/authSlice";
 import * as ImagePicker from "expo-image-picker";
-import { updateProfile } from "firebase/auth";
 import { useToast } from "native-base";
 import React, { useState } from "react";
 import {
@@ -19,15 +18,23 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Delete from "react-native-vector-icons/AntDesign";
 import Edit from "react-native-vector-icons/EvilIcons";
+import { useDispatch } from "react-redux";
 
 const Profile = () => {
   const toast = useToast();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [editable, setEditable] = useState(false);
-  const { user, loading: authLoading, logOut } = useAuth();
+  const {
+    data: user,
+    isSuccess: userLoading,
+    error: userError,
+  } = useGetUserQuery();
+  const [editUser] = useEditUserMutation();
+
   const [form, setForm] = useState({
-    name: user?.displayName,
-    photo: user?.photoURL,
+    name: user?.name,
+    photo: user?.photo,
   });
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -57,15 +64,18 @@ const Profile = () => {
   const UpdateProfile = async () => {
     try {
       setLoading(true);
-      await updateProfile(auth.currentUser, {
-        displayName: form.name,
-        photoURL: form.photo,
-      });
-      setLoading(false);
-      toast.show({
-        description: "Successfully Updated!",
-      });
-      setEditable(false);
+      const userInfo = { name: form.name, photo: form.photo };
+      const res = await editUser({
+        user: userInfo,
+        email: user?.email,
+      }).unwrap();
+      if (res?.success) {
+        setLoading(false);
+        toast.show({
+          description: "Successfully Updated!",
+        });
+        setEditable(false);
+      }
     } catch (error) {
       toast.show({
         description: error.message,
@@ -75,7 +85,7 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
-      await logOut();
+      dispatch(clearUser());
       toast.show({
         description: "Successfully Logged Out!",
       });
@@ -86,7 +96,7 @@ const Profile = () => {
     }
   };
 
-  if (authLoading) {
+  if (!userLoading || userError) {
     return <Loader />;
   }
 

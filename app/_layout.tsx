@@ -1,14 +1,17 @@
-import AuthProvider from "@/services/AuthProvider";
+import store, { persistor } from "@/redux/store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { NativeBaseProvider } from "native-base";
-import { useEffect } from "react";
-
+import { useEffect, useState } from "react";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function RootLayoutComponent() {
+  const [token, setToken] = useState(null);
   const [fontsLoaded, error] = useFonts({
     "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
     "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
@@ -20,6 +23,15 @@ export default function RootLayout() {
     "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
     "Poppins-Thin": require("../assets/fonts/Poppins-Thin.ttf"),
   });
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      const token = await AsyncStorage.getItem("access-token");
+      setToken(token);
+    };
+
+    fetchToken();
+  }, []);
 
   useEffect(() => {
     if (fontsLoaded || error) {
@@ -34,15 +46,23 @@ export default function RootLayout() {
   return (
     <>
       <NativeBaseProvider>
-        <AuthProvider>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-          </Stack>
-          <StatusBar backgroundColor="black" style="dark" />
-        </AuthProvider>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        </Stack>
+        <StatusBar backgroundColor="black" style="dark" />
       </NativeBaseProvider>
     </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <RootLayoutComponent />
+      </PersistGate>
+    </Provider>
   );
 }

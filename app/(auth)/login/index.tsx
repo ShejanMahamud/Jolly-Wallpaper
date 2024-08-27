@@ -1,28 +1,37 @@
 import FormField from "@/components/FormField";
 import PrimaryButton from "@/components/PrimaryButton";
 import images from "@/constants/images";
-import useAuth from "@/hooks/useAuth";
+import { useLoginUserMutation } from "@/redux/api/authApi";
+import { setUser } from "@/redux/features/auth/authSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useToast } from "native-base";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Image, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useDispatch } from "react-redux";
 
 const Login = () => {
+  const [token, setToken] = useState(null);
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
+  const dispatch = useDispatch();
+  const [loginUser] = useLoginUserMutation();
 
   const toast = useToast();
-  const { emailPasswordLogin } = useAuth();
 
   const handleLogin = async () => {
+    console.log(process.env.EXPO_PUBLIC_SERVER_URL);
     try {
       const email = form.email;
       const password = form.password;
-      const res = await emailPasswordLogin(email, password);
-      if (res?.user) {
+      const credentials = { email, password };
+      const res = await loginUser(credentials).unwrap();
+      console.log("Login response:", res); // Debugging line
+      if (res?.success) {
+        dispatch(setUser({ user: res.data, token: res.token }));
         toast.show({
           description: "Successfully Logged In!",
         });
@@ -31,11 +40,20 @@ const Login = () => {
         }, 1000);
       }
     } catch (error) {
+      console.error("Login error:", error); // Debugging line
       toast.show({
-        description: error.message,
+        description: error.message || "An error occurred during login.",
       });
     }
   };
+
+  useEffect(() => {
+    const getToken = async () => {
+      const token = await AsyncStorage.getItem("access-token");
+      setToken(token);
+    };
+    getToken();
+  }, []);
 
   return (
     <SafeAreaView className="bg-primary h-full">

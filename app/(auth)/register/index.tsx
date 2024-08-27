@@ -1,12 +1,11 @@
 import FormField from "@/components/FormField";
 import { uploadImage } from "@/components/ImageUpload";
 import PrimaryButton from "@/components/PrimaryButton";
-import auth from "@/config/firebase.config";
+import Icons from "@/constants/Icons";
 import images from "@/constants/images";
-import useAuth from "@/hooks/useAuth";
+import { useRegisterUserMutation } from "@/redux/api/authApi";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { updateProfile } from "firebase/auth";
 import { useToast } from "native-base";
 import React, { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -17,26 +16,28 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [imageName, setImageName] = useState(null);
   const toast = useToast();
-  const { emailPasswordRegister } = useAuth();
+  const [registerUser] = useRegisterUserMutation();
   const [form, setForm] = useState({
-    username: "",
+    name: "",
     email: "",
     password: "",
-    image: "",
+    photo: "",
   });
 
   const handleRegister = async () => {
     try {
       const email = form.email;
       const password = form.password;
-      const res = await emailPasswordRegister(email, password);
-      if (res?.user) {
-        updateProfile(auth.currentUser, {
-          displayName: form.username,
-          photoURL: form.image,
+      const name = form.name;
+      const photo = form.photo;
+      const user = { email, password, name, photo };
+      const res = await registerUser(user).unwrap();
+      if (res?.success) {
+        toast.show({
+          description: "Successfully Registered!",
         });
         setTimeout(() => {
-          router.push("/home");
+          router.push("/login");
         }, 1000);
       }
     } catch (error) {
@@ -60,7 +61,7 @@ const Register = () => {
       const url = await uploadImage(result.assets[0].uri);
       setForm({
         ...form,
-        image: url,
+        photo: url,
       });
       setLoading(false);
     }
@@ -81,9 +82,9 @@ const Register = () => {
           </Text>
           <FormField
             title={"Username"}
-            handleChangeText={(e) => setForm({ ...form, username: e })}
+            handleChangeText={(e) => setForm({ ...form, name: e })}
             placeholder={"Your unique username"}
-            value={form.username}
+            value={form.name}
             otherStyles={"mt-10"}
           />
           <FormField
@@ -100,14 +101,20 @@ const Register = () => {
             value={form.password}
             otherStyles={"mt-5"}
           />
-          {!form?.image ? (
-            <PrimaryButton
-              handlePress={pickImage}
-              title={"Upload Image"}
-              containerStyles={" mt-5 bg-transparent border border-secondary"}
-              textStyles={"text-secondary"}
-              isLoading={loading}
-            />
+          {!form?.photo ? (
+            <TouchableOpacity
+              onPress={pickImage}
+              className="w-full h-16 px-4 bg-black-100 rounded-2xl border-2 border-black-200 flex justify-center items-center flex-row space-x-2 mt-5"
+            >
+              <Image
+                source={Icons.upload}
+                resizeMode="contain"
+                className="w-5 h-5"
+              />
+              <Text className="text-sm text-gray-100 font-pmedium">
+                Choose a file
+              </Text>
+            </TouchableOpacity>
           ) : (
             <View className="flex-row flex items-center justify-between mt-5">
               <Text className="text-gray-100">{`${imageName.slice(
@@ -118,7 +125,7 @@ const Register = () => {
                 onPress={() =>
                   setForm({
                     ...form,
-                    image: "",
+                    photo: "",
                   })
                 }
               >

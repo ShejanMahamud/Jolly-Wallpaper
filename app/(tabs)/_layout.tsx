@@ -3,7 +3,7 @@ import { Tabs } from "expo-router";
 import React from "react";
 import { Image, Text, View } from "react-native";
 
-const TabIcon = ({ icon, color, focused, title }) => {
+const TabIcon = ({ icon, color, focused, title, size }) => {
   return (
     <View className="flex items-center gap-2 justify-center">
       <Image
@@ -61,10 +61,10 @@ const TabLayout = () => {
         options={{
           headerShown: false,
           title: "Create",
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ color, focused, size }) => (
             <TabIcon
               title={"Create"}
-              icon={Icons.plus}
+              icon={Icons.category}
               focused={focused}
               color={color}
             />
@@ -76,7 +76,7 @@ const TabLayout = () => {
         options={{
           headerShown: false,
           title: "Bookmark",
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ color, focused, size }) => (
             <TabIcon
               title={"Bookmark"}
               icon={Icons.bookmark}

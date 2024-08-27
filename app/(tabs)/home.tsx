@@ -1,10 +1,10 @@
 import Loader from "@/components/Loader";
 import Icons from "@/constants/Icons";
 import images from "@/constants/images";
-import useAuth from "@/hooks/useAuth";
+import { clearUser } from "@/redux/features/auth/authSlice";
 import { router } from "expo-router";
 import { useToast } from "native-base";
-import React from "react";
+import React, { useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -17,13 +17,20 @@ import {
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useDispatch, useSelector } from "react-redux";
 
 const Home = () => {
   const toast = useToast();
-  const { user, loading, logOut } = useAuth();
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
+  const [wallpaper, Setwallpaper] = useState();
+  const user = useSelector((state) => state.auth?.user);
+
   const handleLogout = async () => {
     try {
-      await logOut();
+      setLoading(true);
+      dispatch(clearUser());
+      router.replace("/login");
       toast.show({
         description: "Successfully Logged Out!",
       });
@@ -33,13 +40,15 @@ const Home = () => {
       });
     }
   };
+
   if (!user) {
-    return router.replace("/login");
+    return null;
   }
 
   if (loading) {
     return <Loader />;
   }
+
   return (
     <SafeAreaView className="bg-primary h-full">
       <FlatList
@@ -73,7 +82,7 @@ const Home = () => {
                   Welcome Back!
                 </Text>
                 <Text className="text-2xl font-psemibold text-white">
-                  {user?.displayName}
+                  {user?.name}
                 </Text>
               </View>
               <TouchableOpacity onPress={handleLogout}>
