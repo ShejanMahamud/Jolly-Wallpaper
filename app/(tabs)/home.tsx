@@ -1,6 +1,7 @@
 import Loader from "@/components/Loader";
 import Icons from "@/constants/Icons";
 import images from "@/constants/images";
+import { useGetWallpapersQuery } from "@/redux/api/wallpaperApi";
 import { clearUser } from "@/redux/features/auth/authSlice";
 import { router } from "expo-router";
 import { useToast } from "native-base";
@@ -9,6 +10,7 @@ import {
   Dimensions,
   FlatList,
   Image,
+  RefreshControl,
   ScrollView,
   Text,
   TextInput,
@@ -23,8 +25,26 @@ const Home = () => {
   const toast = useToast();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const [wallpaper, Setwallpaper] = useState();
+  // const [wallpaper, Setwallpaper] = useState();
+  const [refreshing, setRefreshing] = useState(false);
   const user = useSelector((state) => state.auth?.user);
+  const token = useSelector((state) => state.auth?.token);
+  const {
+    data: wallpapers,
+    isSuccess: wallpaperLoading,
+    error: wallpaperError,
+    refetch: wallpaperRefetch,
+  } = useGetWallpapersQuery();
+
+  // useEffect(()=>{
+
+  // },[])
+
+  const OnRefresh = async () => {
+    setRefreshing(true);
+    wallpaperRefetch();
+    setRefreshing(false);
+  };
 
   const handleLogout = async () => {
     try {
@@ -41,18 +61,14 @@ const Home = () => {
     }
   };
 
-  if (!user) {
-    return null;
-  }
-
-  if (loading) {
+  if (loading || !wallpaperLoading || wallpaperError) {
     return <Loader />;
   }
 
   return (
     <SafeAreaView className="bg-primary h-full">
       <FlatList
-        data={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+        data={wallpapers.data}
         keyExtractor={(item) => item}
         numColumns={2}
         renderItem={({ item }) => (
@@ -67,11 +83,15 @@ const Home = () => {
               backgroundColor: "white",
             }}
           >
-            <Image
-              source={images.image2}
-              resizeMode="cover"
-              className="w-full h-full object-cover"
-            />
+            <TouchableOpacity
+              onPress={() => router.push(`/wallpaper/${item?._id}`)}
+            >
+              <Image
+                source={{ uri: item.wallpaper_url }}
+                resizeMode="cover"
+                className="w-full h-full object-cover"
+              />
+            </TouchableOpacity>
           </View>
         )}
         ListHeaderComponent={() => (
@@ -207,6 +227,9 @@ const Home = () => {
             </ScrollView>
           </View>
         )}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={OnRefresh} />
+        }
       />
     </SafeAreaView>
   );

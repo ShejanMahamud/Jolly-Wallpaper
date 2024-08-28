@@ -43,7 +43,7 @@ const Home = () => {
           </Text>
           <PrimaryButton
             title="Continue with Email"
-            handlePress={() => router.push("/register")}
+            handlePress={() => router.push("/home")}
             containerStyles="w-[90%] mt-5"
           />
         </View>

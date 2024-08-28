@@ -7,6 +7,7 @@ import home from "../assets/icons/home.png";
 import leftArrow from "../assets/icons/left-arrow.png";
 import logout from "../assets/icons/logout.png";
 import menu from "../assets/icons/menu.png";
+import paint from "../assets/icons/paint.png";
 import play from "../assets/icons/play.png";
 import plus from "../assets/icons/plus.png";
 import profile from "../assets/icons/profile.png";
@@ -29,4 +30,5 @@ export default {
   eye,
   google,
   category,
+  paint,
 };

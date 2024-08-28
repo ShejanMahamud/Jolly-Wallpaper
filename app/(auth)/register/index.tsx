@@ -143,7 +143,7 @@ const Register = () => {
           <Text className="text-gray-100 font-pregular text-base mt-5 text-center">
             Already have an account?{" "}
             <Text
-              onPress={() => router.push("/home")}
+              onPress={() => router.push("/login")}
               className="text-secondary font-psemibold focus:underline underline-offset-4 decoration-secondary"
             >
               Login
